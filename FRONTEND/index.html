@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciador de Check-in de Leitura</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <img src="img/livros.png" alt="Logo">
+          Leitura Colaborativa
+        </div>
+        <nav class="nav" id="main-nav">
+          <a href="#" onclick="showPage('home')">Início</a>
+          <a href="#" onclick="showPage('groups')">Grupos</a>
+          <a href="#" onclick="showPage('profile')">Perfil</a>
+          <div class="user-menu">
+            <div class="user-avatar" id="user-avatar">?</div>
+            <span class="user-name" id="user-name">Usuário</span>
+            <div class="dropdown-menu">
+              <a href="#" onclick="showPage('profile')">Meu Perfil</a>
+              <a href="#" onclick="showPage('settings')">Configurações</a>
+              <button onclick="handleLogout()">Sair</button>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <div id="alerts-container"></div>
+    <div class="container">
+
+      <div id="page-login" class="page">
+        <div style="max-width: 400px; margin: 60px auto;">
+          <div class="card">
+            <h1 style="text-align: center; margin-bottom: 30px; color: var(--primary);">Login</h1>
+            <form onsubmit="handleLogin(event)">
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="login-email" required>
+              </div>
+              <div class="form-group">
+                <label>Senha</label>
+                <input type="password" id="login-password" required>
+              </div>
+              <button type="submit" class="btn-primary w-full">Entrar</button>
+              <p style="text-align: center; margin-top: 20px;">
+                Não tem conta? <a href="#" onclick="showPage('register')">Registre-se</a>
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div id="page-register" class="page">
+        <div style="max-width: 400px; margin: 60px auto;">
+          <div class="card">
+            <h1 style="text-align: center; margin-bottom: 30px; color: var(--primary);">Registrar</h1>
+            <form onsubmit="handleRegister(event)">
+              <div class="form-group">
+                <label>Nome</label>
+                <input type="text" id="register-name" required>
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="register-email" required>
+              </div>
+              <div class="form-group">
+                <label>Senha</label>
+                <input type="password" id="register-password" required>
+              </div>
+              <button type="submit" class="btn-primary w-full">Registrar</button>
+              <p style="text-align: center; margin-top: 20px;">
+                Já tem conta? <a href="#" onclick="showPage('login')">Faça login</a>
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div id="page-home" class="page">
+        <h1>Bem-vindo ao Gerenciador de Check-in de Leitura</h1>
+        <p style="font-size: 16px; margin: 20px 0; color: #64748B;">
+          Organize seus grupos de leitura, crie projetos colaborativos e acompanhe o progresso de cada membro.
+        </p>
+        <div class="grid grid-2" style="margin-top: 40px;">
+          <div class="card">
+            <h3 style="color: var(--primary); margin-bottom: 10px;">📚 Meus Grupos</h3>
+            <p>Gerenciar seus grupos de leitura e convites.</p>
+            <button class="btn-primary" onclick="showPage('groups')" style="margin-top: 15px;">Acessar</button>
+          </div>
+          <div class="card">
+            <h3 style="color: var(--primary); margin-bottom: 10px;">👤 Meu Perfil</h3>
+            <p>Editar informações pessoais e configurações.</p>
+            <button class="btn-primary" onclick="showPage('profile')" style="margin-top: 15px;">Acessar</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="page-groups" class="page">
+        <div class="flex-between" style="margin-bottom: 30px;">
+          <h1>Meus Grupos</h1>
+          <button class="btn-primary" onclick="showModal('create-group-modal')">+ Novo Grupo</button>
+        </div>
+        <div id="groups-container" class="grid grid-2"></div>
+      </div>
+
+      <div id="page-group-detail" class="page">
+        <button class="btn-outline" onclick="showPage('groups')" style="margin-bottom: 20px;">← Voltar</button>
+        <div id="group-detail-container"></div>
+      </div>
+
+      <div id="page-profile" class="page">
+        <div id="profile-container"></div>
+      </div>
+
+      <div id="page-settings" class="page">
+        <h1>Configurações</h1>
+        <div class="card" style="max-width: 600px;">
+          <h2 style="color: var(--primary); margin-bottom: 20px;">URL da API</h2>
+          <div class="form-group">
+            <label>URL Base da API</label>
+            <input type="text" id="api-url-input" value="http://localhost:5000">
+          </div>
+          <button class="btn-primary" onclick="updateApiUrl()">Salvar URL</button>
+          <div class="divider"></div>
+          <h2 style="color: var(--primary); margin-bottom: 20px;">Tema</h2>
+          <button class="btn-secondary" onclick="toggleDarkMode()">Alternar Modo Escuro</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="create-group-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Criar Novo Grupo</h2>
+        <button class="modal-close" onclick="closeModal('create-group-modal')">×</button>
+      </div>
+      <form onsubmit="handleCreateGroup(event)">
+        <div class="form-group">
+          <label>Nome do Grupo</label>
+          <input type="text" id="group-name" required>
+        </div>
+        <div class="form-group">
+          <label>Descrição</label>
+          <textarea id="group-description" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn-primary w-full">Criar Grupo</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="create-project-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Criar Novo Projeto</h2>
+        <button class="modal-close" onclick="closeModal('create-project-modal')">×</button>
+      </div>
+      <form onsubmit="handleCreateProject(event)">
+        <div class="form-group">
+          <label>Nome do Livro</label>
+          <input type="text" id="project-name" required>
+        </div>
+        <div class="form-group">
+          <label>Autor</label>
+          <input type="text" id="project-author" required>
+        </div>
+        <div class="form-group">
+          <label>URL da Capa</label>
+          <input type="url" id="project-cover">
+        </div>
+        <div class="form-group">
+          <label>Descrição</label>
+          <textarea id="project-description" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Prazo (opcional)</label>
+          <input type="datetime-local" id="project-deadline">
+        </div>
+        <button type="submit" class="btn-primary w-full">Criar Projeto</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="create-checkin-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Novo Check-in</h2>
+        <button class="modal-close" onclick="closeModal('create-checkin-modal')">×</button>
+      </div>
+      <form onsubmit="handleCreateCheckIn(event)">
+        <div class="form-group">
+          <label>URL da Foto</label>
+          <input type="url" id="checkin-photo">
+        </div>
+        <div class="form-group">
+          <label>Comentário</label>
+          <textarea id="checkin-comment" rows="4"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Capítulo</label>
+            <input type="number" id="checkin-chapter" min="1">
+          </div>
+          <div class="form-group">
+            <label>Página</label>
+            <input type="number" id="checkin-page" min="1">
+          </div>
+        </div>
+        <button type="submit" class="btn-primary w-full">Registrar Check-in</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/groups.js"></script>
+  <script src="js/projects.js"></script>
+  <script src="js/checkins.js"></script>
+  <script src="js/pages.js"></script>
+</body>
+</html>

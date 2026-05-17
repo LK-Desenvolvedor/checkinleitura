@@ -1,37 +1,27 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const authRoutes = require('./routes/authRoutes');
 require('dotenv').config();
+
+const authRoutes = require('./routes/authRoutes');
+const groupRoutes = require('./routes/groupRoutes');
+const projectRoutes = require('./routes/projectRoutes');
+const checkInRoutes = require('./routes/checkInRoutes');
 
 const app = express();
 
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:8081'];
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  credentials: true
+};
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'A política de CORS para este site não permite acesso a partir da origem especificada.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  optionsSuccessStatus: 200
-}));
-
+app.use(cors(corsOptions));
 app.use(express.json());
-
-app.get('/', (req, res) => {
-  res.status(200).json({ msg: 'Bem vindo' });
-});
-
-app.use('/auth', authRoutes);
 
 const dbURI = process.env.DB_URI;
 
 if (!dbURI) {
-  console.error("A variável de ambiente DB_URI não está definida no arquivo .env.");
+  console.error('A variável de ambiente DB_URI não está definida no arquivo .env.');
   process.exit(1);
 }
 
@@ -41,14 +31,28 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true
     });
-    console.log("Conectado ao banco de dados com sucesso!");
+    console.log('Conectado ao banco de dados com sucesso!');
   } catch (err) {
-    console.error("Conexão com o banco de dados falhou:", err);
+    console.error('Conexão com o banco de dados falhou:', err);
     process.exit(1);
   }
 };
 
 connectDB();
+
+app.get('/', (req, res) => {
+  res.status(200).json({ message: 'Bem-vindo ao Gerenciador de Check-in de Leitura' });
+});
+
+app.use('/auth', authRoutes);
+app.use('/groups', groupRoutes);
+app.use('/projects', projectRoutes);
+app.use('/checkins', checkInRoutes);
+
+app.use((err, req, res, next) => {
+  console.error('Erro:', err);
+  res.status(500).json({ message: 'Erro interno do servidor' });
+});
 
 const PORT = process.env.PORT || 5000;
 
